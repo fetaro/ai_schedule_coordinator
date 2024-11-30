@@ -1,0 +1,33 @@
+[project]
+name = "gcal-ai"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "fetaro", email = "fetaro@gmail.com" }
+]
+dependencies = [
+    "google-api-python-client>=2.154.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.1",
+    "openai>=1.55.3",
+    "pydantic>=2.10.2",
+    "streamlit>=1.40.2",
+]
+readme = "README.md"
+requires-python = ">= 3.9"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.3.3",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gcal_ai"]
