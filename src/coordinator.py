@@ -1,3 +1,4 @@
+import datetime
 import json
 from typing import List
 
@@ -28,10 +29,10 @@ class Coordinator:
     @staticmethod
     def coordinate(user_prompt: str):
         gpt = GptService()
-        system_prompt = '''
+        system_prompt = f'''
 次に示す会話の中に登場する、会議の時間候補を、30分ごとに区切って出力してください。
 
-会話の中で、年が省略されている場合は、2024年としてください。
+会話の中で、年が省略されている場合は、{datetime.datetime.now().year}年としてください。
 
 以下のJSON形式で出力してください。出力に「```json」や「```」といった文字は不要です。
 
