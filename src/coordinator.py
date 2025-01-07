@@ -5,6 +5,7 @@ from typing import List
 from event import Event
 from google_calender_service import GoogleCalenderService
 from gpt_service import GptService
+from result import Result
 from time_range import TimeRangeList, TimeRange
 
 
@@ -29,10 +30,10 @@ class Coordinator:
     @staticmethod
     def coordinate(user_prompt: str):
         gpt = GptService()
-        system_prompt = f'''
-次に示す会話の中に登場する、会議の時間候補を、30分ごとに区切って出力してください。
+        system_prompt = '''
+次に示す会話の中に登場する、会議の時間候補を、抽出してください。
 
-会話の中で、年が省略されている場合は、{datetime.datetime.now().year}年としてください。
+会話の中で、年が省略されている場合は、2025年としてください。
 
 以下のJSON形式で出力してください。出力に「```json」や「```」といった文字は不要です。
 
@@ -53,8 +54,13 @@ startは開始時間、endは終了時間です。
         # 開始時間ソートする
         candidate_time_range_list.sort(key=lambda x: x.start_dt())
 
-        event_list = GoogleCalenderService.get_my_schedule(start=candidate_time_range_list[0].start_dt(),
-                                                           end=candidate_time_range_list[-1].end_dt())
-        result_time_range_list = Coordinator.calc(candidate_time_range_list, event_list)
+        # 30分ごとに分解
+        candidate_time_range_list_30min = []
+        for time_range in candidate_time_range_list:
+            candidate_time_range_list_30min.extend(time_range.split_to_30min())
 
-        return event_list, result_time_range_list
+        event_list = GoogleCalenderService.get_my_schedule(start=candidate_time_range_list_30min[0].start_dt(),
+                                                           end=candidate_time_range_list_30min[-1].end_dt())
+        result_time_range_list = Coordinator.calc(candidate_time_range_list_30min, event_list)
+
+        return Result( candidate_time_range_list=candidate_time_range_list,candidate_time_range_list_30min=candidate_time_range_list_30min, event_list=event_list, result_time_range_list=result_time_range_list)
