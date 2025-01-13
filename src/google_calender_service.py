@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from conf import TOKEN_PATH, CREDENTIAL_APTH, API_MAX_RESULT
+from conf import Config
 from event import Event
 from event_parser import EventParser
 
@@ -26,8 +26,8 @@ class GoogleCalenderService:
         このコードは https://developers.google.com/calendar/quickstart/python 参照にして作成した
         """
         creds = None
-        if os.path.exists(TOKEN_PATH):
-            with open(TOKEN_PATH, 'rb') as token:
+        if os.path.exists(Config.TOKEN_PATH):
+            with open(Config.TOKEN_PATH, 'rb') as token:
                 creds = pickle.load(token)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -35,13 +35,13 @@ class GoogleCalenderService:
             else:
                 # ブラウザを用いて認証しトークンを取得
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    CREDENTIAL_APTH, ['https://www.googleapis.com/auth/calendar.readonly'])
+                    Config.CREDENTIAL_APTH, ['https://www.googleapis.com/auth/calendar.readonly'])
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with open(TOKEN_PATH, "wb") as token:
+            with open(Config.TOKEN_PATH, "wb") as token:
                 pickle.dump(creds, token)
-                os.chmod(TOKEN_PATH, 0o755)
-                print(f"make {TOKEN_PATH}")
+                os.chmod(Config.TOKEN_PATH, 0o755)
+                print(f"make {Config.TOKEN_PATH}")
         return creds
 
     @staticmethod
@@ -57,7 +57,7 @@ class GoogleCalenderService:
             calendarId='primary',
             timeMin=time_min,  # 'Z' indicates UTC time,
             timeMax=time_max,
-            maxResults=API_MAX_RESULT,
+            maxResults=Config.API_MAX_RESULT,
             singleEvents=True,
             orderBy='startTime',
             timeZone="Asia/Tokyo",

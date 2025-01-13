@@ -1,21 +1,27 @@
 import logging
 from typing import Optional
 
-from openai import OpenAI
+from openai import OpenAI, AzureOpenAI
 from openai.types.chat import ChatCompletion
 from pydantic import BaseModel
 
-from conf import OPENAI_API_KEY_PATH
+from conf import Config
 
 
 class GptService:
     def __init__(
             self,
     ):
-        self.gpt_model = "gpt-4o-2024-08-06"
+        self.gpt_model = Config.OPENAI_MODEL_NAME
         self.logger = logging.getLogger()
-        api_key = open(OPENAI_API_KEY_PATH, "r").read().strip()
-        self.client = OpenAI(api_key=api_key)
+        api_key = open(Config.OPENAI_API_KEY_PATH, "r").read().strip()
+        if Config.OPENAI_USE_AZURE_OPEN_AI:
+            self.client = AzureOpenAI(api_key=api_key,
+                                      api_version=Config.OPENAI_API_VERSION,
+                                      azure_endpoint=Config.OPENAI_AZURE_ENDPOINT
+                                      )
+        else:
+            self.client = OpenAI(api_key=api_key)
         self.gpt_parameters = {}
 
     def health_check(self):
